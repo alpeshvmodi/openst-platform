@@ -130,6 +130,17 @@ const StakeAndMintProcessorInterCommKlassSpecificPrototype = {
       , openSTValueContractInteract = new OpenSTValueKlass()
     ;
 
+    if ( !stakingIntentHash || !staker || !beneficiary || !uuid ) {
+      logger.warn("One of the mandatory inputs missing in. eventObj.returnValues. Returning error response.");
+      logger.debug("eventObj.returnValues", eventObj.returnValues);
+      let errObj = responseHelper.error({
+        internal_error_identifier: 'e_ic_samp_processor_0_validation',
+        api_error_identifier: 'process_staking_transaction_error',
+        error_config: basicHelper.fetchErrorConfig()
+      });
+      return Promise.resolve(errObj);
+    }
+
     // do not perform any action if the stake was not done using the internal address.
     if (!stakerAddress.equalsIgnoreCase(staker)) {
       return Promise.resolve(responseHelper.successWithData({}));
