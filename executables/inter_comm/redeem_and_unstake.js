@@ -20,6 +20,7 @@
  */
 
 const rootPrefix = '../..'
+
   , logger = require(rootPrefix + '/helpers/custom_console_logger')
   , eventQueueManagerKlass = require(rootPrefix + '/lib/web3/events/queue_manager')
   , coreAddresses = require(rootPrefix + '/config/core_addresses')
