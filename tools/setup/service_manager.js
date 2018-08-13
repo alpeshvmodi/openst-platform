@@ -277,19 +277,24 @@ ServiceManagerKlass.prototype = {
     const oThis = this,
       gethManager = oThis.ic().getSetupGethManager(),
       coreConstants = oThis.ic().getCoreConstants(),
+      configStrategy = oThis.ic().configStrategy,
       chainDetails = setupConfig.chains[chain],
       networkId = chainDetails['network_id'].value,
-      chainPort = chainDetails['port'].value,
+      chainPort = chain == 'value' ? configStrategy.OST_VALUE_PORT_NUMBER : configStrategy.OST_UTILITY_PORT_NUMBER,
       zeroGas = coreConstants.OST_UTILITY_GAS_PRICE_FOR_DEPLOYMENT,
       gasLimit = { utility: coreConstants.OST_UTILITY_GAS_LIMIT, value: coreConstants.OST_VALUE_GAS_LIMIT },
-      gasPrice = purpose === 'deployment' && chain == 'utility' ? zeroGas : chainDetails.gas_price.value,
+      gasPrice = purpose === 'deployment' && chain == 'utility' ? zeroGas : configStrategy.OST_VALUE_GAS_PRICE,
       chainFolder = setupHelper.gethFolderFor(chain),
       chainDataDir = setupHelper.setupFolderAbsolutePath() + '/' + setupHelper.gethFolderFor(chain),
       sealerPassword = setupConfig.addresses['sealer'].passphrase.value,
-      rpcProviderHostPort = chainDetails.rpc_provider.value.replace('http://', '').split(':'),
+      rpc_url =
+        chain == 'value' ? configStrategy.OST_VALUE_GETH_RPC_PROVIDER : configStrategy.OST_UTILITY_GETH_RPC_PROVIDER,
+      rpcProviderHostPort = rpc_url.replace('http://', '').split(':'),
       rpcHost = rpcProviderHostPort[0],
       rpcPort = rpcProviderHostPort[1],
-      wsProviderHostPort = chainDetails.ws_provider.value.replace('ws://', '').split(':'),
+      ws_url =
+        chain == 'value' ? configStrategy.OST_VALUE_GETH_WS_PROVIDER : configStrategy.OST_UTILITY_GETH_WS_PROVIDER,
+      wsProviderHostPort = ws_url.replace('ws://', '').split(':'),
       wsHost = wsProviderHostPort[0],
       wsPort = wsProviderHostPort[1];
 

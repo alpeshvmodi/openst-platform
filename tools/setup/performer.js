@@ -162,10 +162,10 @@ OpenSTSetup.prototype = {
     }
 
     if (step === 'dynamo_db_shard_management' || step === 'all') {
-      let cmd = "ps aux | grep dynamo | grep java | grep -v grep | tr -s ' ' | cut -d ' ' -f2";
+      let cmd = "ps aux | grep dynamo | grep -v grep | tr -s ' ' | cut -d ' ' -f2";
       let processId = shell.exec(cmd).stdout;
 
-      if (processId === '') {
+      if (processId == '') {
         // Start Dynamo DB
         let startDynamo = new StartDynamo();
         await startDynamo.perform();
@@ -182,9 +182,61 @@ OpenSTSetup.prototype = {
       await oThis.performHelperService(oThis.dynamoDbRegisterShards);
     }
 
+    if (options.utility_configs) {
+      for (let config in options.utility_configs) {
+        await oThis.setupUtilityChain(step, config);
+      }
+    } else {
+      await oThis.setupUtilityChain(step);
+    }
+
+    return Promise.resolve(setupConfig);
+  },
+
+  performHelperService: async function(service, methodName, args) {
+    methodName = methodName || 'perform';
+
+    const oThis = this;
+
+    await oThis.reloadConfig();
+
+    //3. Pre-warm constants & addresses.
+    oThis.ic().getCoreConstants();
+    oThis.ic().getCoreAddresses();
+
+    return service[methodName].apply(service, args || []);
+  },
+
+  reloadConfig: async function() {
+    const oThis = this;
+
+    //1. Reload the config.
+    oThis.ic().configStrategy = fileManager.getPlatformConfig();
+    //2. Clear all retained instances.
+    oThis.ic().instanceMap = {};
+
+    return {};
+  },
+
+  setupUtilityChain: async function(step, config) {
+    const oThis = this;
+
     if (step === 'init_utility_chain' || step === 'all') {
       // Get value config file to default location
       fileManager.cp(setupHelper.configFolder(), '.', setupConfig.openst_platform_config_file);
+
+      // Get current chain config if not provided in input
+      if (config) {
+        let valueConfig = require(setupHelper.configStrategyFilePath());
+        valueConfig['OST_UTILITY_CHAIN_ID'] = config.chain_id;
+        valueConfig['OST_UTILITY_GETH_WS_PROVIDER'] = config.ws_provider;
+        valueConfig['OST_UTILITY_GETH_RPC_PROVIDER'] = config.rpc_provider;
+        valueConfig['OST_UTILITY_PORT_NUMBER'] = config.port;
+
+        fileManager.touch(setupConfig.openst_platform_config_file, valueConfig);
+
+        await oThis.reloadConfig();
+      }
 
       // Utility chain folders setup
       logger.step('** Utility chain folders setup');
@@ -248,7 +300,7 @@ OpenSTSetup.prototype = {
     if (step === 'snm_intercomm' || step === 'all') {
       // Starting stake and mint intercomm
       logger.step('** Starting stake and mint intercomm');
-      let intercomProcessDataFile =
+      var intercomProcessDataFile =
         setupHelper.setupFolderAbsolutePath() +
         '/' +
         setupHelper.utilityChainDataFilesFolder() +
@@ -260,7 +312,7 @@ OpenSTSetup.prototype = {
     if (step === 'snmp_intercomm' || step === 'all') {
       // Starting stake and mint processor intercomm
       logger.step('** Starting stake and mint processor intercomm');
-      let intercomProcessDataFile =
+      var intercomProcessDataFile =
         setupHelper.setupFolderAbsolutePath() +
         '/' +
         setupHelper.utilityChainDataFilesFolder() +
@@ -292,25 +344,6 @@ OpenSTSetup.prototype = {
       logger.info(Array(30).join('='));
       oThis.serviceManager.postSetupSteps();
     }
-
-    return Promise.resolve(setupConfig);
-  },
-
-  performHelperService: function(service, methodName, args) {
-    methodName = methodName || 'perform';
-
-    const oThis = this;
-
-    //1. Reload the config.
-    oThis.ic().configStrategy = fileManager.getPlatformConfig();
-    //2. Clear all retained instances.
-    oThis.ic().instanceMap = {};
-
-    //3. Pre-warm constants & addresses.
-    oThis.ic().getCoreConstants();
-    oThis.ic().getCoreAddresses();
-
-    return service[methodName].apply(service, args || []);
   }
 };
 

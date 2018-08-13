@@ -30,7 +30,7 @@ const setupConfig = {
         value: 2001 //Editable
       },
       port: {
-        env_var: '',
+        env_var: 'OST_VALUE_PORT_NUMBER',
         value: 30301 //Editable
       },
       gas_price: {
@@ -60,8 +60,8 @@ const setupConfig = {
         value: 1000 //Editable
       },
       port: {
-        env_var: '',
-        value: 30310 //Editable
+        env_var: 'OST_UTILITY_PORT_NUMBER',
+        value: 30311 //Editable
       },
       gas_price: {
         env_var: 'OST_UTILITY_GAS_PRICE',

@@ -1,0 +1,18 @@
+{
+  "utility_configs": [
+    {
+      "chain_id": 1000,
+      "network_id": 1000,
+      "port": 30310,
+      "ws_provider": "ws://127.0.0.1:19547",
+      "rpc_provider": "http://127.0.0.1:9547"
+    },
+    {
+      "chain_id": 1001,
+      "network_id": 1001,
+      "port": 30311,
+      "ws_provider": "ws://127.0.0.1:19548",
+      "rpc_provider": "http://127.0.0.1:9548"
+    }
+  ]
+}
